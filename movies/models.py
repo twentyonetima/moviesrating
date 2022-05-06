@@ -29,6 +29,9 @@ class Actor(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('actor_detail', kwargs={'slug': self.name})
+
     class Meta:
         verbose_name = "Режиссеры и актеры"
         verbose_name_plural = "Режиссеры и актеры"
@@ -77,26 +80,29 @@ class Movie(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('movie_detil', kwargs={'slug': self.url})
+        return reverse('movie_detail', kwargs={'slug': self.url})
+
+    def get_review(self):
+        return self.reviews_set.filter(parent__isnull=True)
 
     class Meta:
         verbose_name = "Movie"
         verbose_name_plural = "Movies"
 
 
-class MovieShorts(models.Model):
+class MovieShots(models.Model):
     """Кадры фильма"""
-    title = models.CharField("Название", max_length=100)
+    title = models.CharField("Заголовок", max_length=100)
     description = models.TextField("Описание")
-    image = models.ImageField("Изображение", upload_to="movie_shorts/")
+    image = models.ImageField("Изображение", upload_to="movie_shots/")
     movie = models.ForeignKey(Movie, verbose_name="Фильм", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
 
     class Meta:
-        verbose_name = "Кадр фильма"
-        verbose_name_plural = "Кадры фильма"
+        verbose_name = "Кадр из фильма"
+        verbose_name_plural = "Кадры из фильма"
 
 
 class RatingStar(models.Model):
@@ -104,11 +110,12 @@ class RatingStar(models.Model):
     value = models.PositiveSmallIntegerField("Значение", default=0)
 
     def __str__(self):
-        return self.value
+        return f'{self.value}'
 
     class Meta:
         verbose_name = "Звезад рейтинга"
         verbose_name_plural = "Звезды рейтинга"
+        ordering = ['-value']
 
 
 class Rating(models.Model):
